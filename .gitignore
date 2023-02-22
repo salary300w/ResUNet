@@ -1,0 +1,5 @@
+__pycache__
+.vscode
+train_logs
+module_file
+data2train
