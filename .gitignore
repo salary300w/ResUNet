@@ -1,0 +1,9 @@
+__pycache__
+.vscode
+train_logs
+module_file
+data2train
+model_data
+logs
+predict_out
+two_pass
