@@ -1,81 +1,58 @@
-from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from PIL import Image
 import torch
-import torchvision
 import time
 import os
 import shutil
+from config import *
 from mydataset import *
 from res_net_module import *
 from emailtool import *
 
 
-def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", tensorboard=True):
-
-    # epoch:迭代次数
-    # dev:训练设备
-    # email:训练完成是否发送邮件通知
-    # email_addr:接收通知的邮箱地址
-    # accuracy_level:当训练集准确率大于accuracy_level,会进行测试。测试集准确率大于accuracy_level会进行模型保存并结束训练
-    # tensorboard:是否使用tensorboard绘制训练曲线
-    mean = [0.5, 0.5, 0.5]
-    std = [0.5, 0.5, 0.5]
-    # 归一化处理
-    normalize = torchvision.transforms.Normalize(mean=mean, std=std)
-
-    transform=torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor()
-    ])
-
-    learning_rate = 1e-3
-    model_batch_size=2
-
+def train():
+    
+    config=NetConfig()
     # 定义训练的设备
-    dev = torch.device(device=dev if torch.cuda.is_available() else "cpu")
+    dev = torch.device(device=config.device if torch.cuda.is_available() else "cpu")
+    # 创建网络模型、优化器
+    module = Res_U_Net().to(device=dev)
+    optimizer = torch.optim.Adam(params=module.parameters(), lr=config.learning_rate)
+
 
     # 数据集准备
-    train_data = Mydataset(root_dir='/home/cdk991014/workspace/ResUNet/data',is_train=True,transform=transform)
-    test_data = Mydataset(root_dir='/home/cdk991014/workspace/ResUNet/data',is_train=False,transform=transform)
+    train_data = Mydataset(root_dir=config.data_dir,is_train=True,transform=config.transform)
+    test_data = Mydataset(root_dir=config.data_dir,is_train=False,transform=config.transform)
 
     # 数据集大小
     print("-----训练集大小= {} -----".format(len(train_data)))
     print("-----测试集大小= {} -----".format(len(test_data)))
 
     # 数据集加载
-    train_loader = DataLoader(dataset=train_data, batch_size=model_batch_size, shuffle=True, num_workers=4)
-    test_loader = DataLoader(dataset=test_data, batch_size=model_batch_size, shuffle=True, num_workers=4)
+    train_loader = DataLoader(dataset=train_data, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
+    test_loader = DataLoader(dataset=test_data, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
 
-    # 创建网络模型,转移至训练设备
-    module = Res_U_Net().to(device=dev)
-
-    # 损失函数,转移至训练设备
-    loss_fn = nn.MSELoss().to(device=dev)
-
-    # 优化器
-    optimizer = torch.optim.Adam(params=module.parameters(), lr=learning_rate)
+    #损失函数,转移至训练设备
+    loss_fn = config.loss_fn.to(device=dev)
     # optimizer = torch.optim.SGD(params=module.parameters(), lr=learning_rate)
-
-    # 设置训练网络的一些参数
 
     # 记录测试的次数
     test_step = 0
 
-    if tensorboard:
+    if config.tensorboard:
         # 使用tensorboard画出训练曲线
         if os.path.exists("train_logs"):
             shutil.rmtree("train_logs")
         writer = SummaryWriter("train_logs")
 
     # 设置模型存储目录
-    save_path = "module_file"
+    save_path = config.module_save_dir
     save_path = os.path.join(save_path, str(time.time()))
     os.makedirs(save_path)
 
     # -----开始训练-----
     print("-----开始训练-----")
     start_time = time.time()
-    for i in range(1, epoch+1):
+    for i in range(1, config.epoch+1):
         print("-----第 {} 轮训练开始-----".format(i))
         total_train_loss = 0  # 记录每次迭代的总误差值
         total_test_loss = 0  # 记录每次迭代的总误差值
@@ -104,11 +81,11 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
             print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
 
         # 绘制训练曲线图
-        if tensorboard:
+        if config.tensorboard:
             writer.add_scalar(tag="total_train_loss", scalar_value=total_train_loss, global_step=i)
 
         # 训练集准确度达标则进行测试
-        if i == epoch or i % 5 == 0:
+        if i == config.epoch or i % 5 == 0:
             # 测试步骤开始
             print("-----开始测试-----")
             module.eval()  # 设定为验证模式，仅对某些特殊层生效，具体看说明文档
@@ -127,7 +104,7 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
                     total_test_loss += loss
             test_step += 1
             # 绘制测试曲线图
-            if tensorboard:
+            if config.tensorboard:
                 writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
             print("-----第 {} 轮测试Loss: {} -----".format(test_step, total_test_loss))
             if i % 10 == 0:
@@ -146,9 +123,9 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
     writer.close()
 
     # 发送邮件
-    if email:
+    if config.email:
         print("-----发送邮件通知-----")
-        sendemail = Email(email_addr)
+        sendemail = Email(config.email_address)
         sendemail.send(
             "训练完成<br/>测试集Loss: {}<br/>迭代次数: {}<br/>用时: {} 秒".format(
                 total_test_loss, i, elapsed_time
@@ -161,6 +138,5 @@ def savemodule(MODULE, PATH, LOSS):
     MODULE.to(torch.device(device="cpu"))  # 将模型转移至cpu保存
     torch.save(MODULE, os.path.join(PATH, "module_loss={}".format(round(LOSS.item(), 5))))
 
-
 if __name__ == "__main__":
-    train(epoch=30, email=True)
+    train()
