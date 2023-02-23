@@ -6,7 +6,7 @@ import torchvision
 import time
 import os
 import shutil
-from VOCSegDataset import *
+from mydataset import *
 from res_net_module import *
 from emailtool import *
 
@@ -24,6 +24,10 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
     # 归一化处理
     normalize = torchvision.transforms.Normalize(mean=mean, std=std)
 
+    transform=torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor()
+    ])
+
     learning_rate = 1e-3
     model_batch_size=2
 
@@ -31,8 +35,8 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
     dev = torch.device(device=dev if torch.cuda.is_available() else "cpu")
 
     # 数据集准备
-    train_data = VOCSegDataset(is_train=True,voc_dir='data2train',settransform=normalize)
-    test_data = VOCSegDataset(is_train=False, voc_dir='data2train',settransform=normalize)
+    train_data = Mydataset(root_dir='/home/cdk991014/workspace/ResUNet/data',is_train=True,transform=transform)
+    test_data = Mydataset(root_dir='/home/cdk991014/workspace/ResUNet/data',is_train=False,transform=transform)
 
     # 数据集大小
     print("-----训练集大小= {} -----".format(len(train_data)))
@@ -82,7 +86,7 @@ def train(epoch=200, dev="cuda", email=True, email_addr="Atm991014@163.com", ten
             # 转移至训练设备
             imgs = imgs.to(dev)
             labels = labels.to(dev)
-
+            
             # 将数据输入模型
             outputs = module(imgs)
 

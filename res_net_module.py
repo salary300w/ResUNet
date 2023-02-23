@@ -29,7 +29,7 @@ class Res_U_Net(nn.Module):
             nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=4, stride=2,padding=1)
         )
         self.layer3 = nn.Sequential(
-            nn.Conv2d(in_channels=64, out_channels=3, kernel_size=1),
+            nn.Conv2d(in_channels=64, out_channels=1, kernel_size=1),
             nn.Softmax2d()
         )
 
