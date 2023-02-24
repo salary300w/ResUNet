@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from PIL import Image
-from res_net_module import *
+from module import *
 from emailtool import *
 from config import *
 
@@ -12,9 +12,9 @@ def res_net_out(Module_dir,input_dir):
     '''
     config=NetConfig()
     res_net_module=torch.load(Module_dir)
-    img=Image.open(input_dir)
-    yuanimg=config.transform(img)
-    image=res_net_module(yuanimg)
+    image=Image.open(input_dir)
+    image=config.transform(image)
+    image=res_net_module(image)
     transformer = torchvision.transforms.ToPILImage()
     image=transformer(image)
     return image

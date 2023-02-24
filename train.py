@@ -4,8 +4,8 @@ import time
 import os
 import shutil
 from config import *
-from mydataset import *
-from res_net_module import *
+from dataset import *
+from module import *
 from emailtool import *
 
 
@@ -77,8 +77,7 @@ def train():
             optimizer.step()
         # 计算本轮训练集的正确率
         print("-----第 {} 轮训练Loss: {} -----".format(i, total_train_loss))
-        if i % 10 == 0:
-            print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
+        print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
 
         # 绘制训练曲线图
         if config.tensorboard:
@@ -107,8 +106,7 @@ def train():
             if config.tensorboard:
                 writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
             print("-----第 {} 轮测试Loss: {} -----".format(test_step, total_test_loss))
-            if i % 10 == 0:
-                print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
+            print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
     # -----迭代结束-----
     # 计算训练用时并输出
     end_time = time.time()

@@ -1,7 +1,6 @@
-import torch
 import torchvision
-from res_net_module import *
-from mydataset import *
+import torch.nn as nn
+from dataset import *
 from torch.utils.data import DataLoader
 
 
