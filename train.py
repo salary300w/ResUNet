@@ -5,7 +5,7 @@ import os
 import shutil
 from config import *
 from dataset import *
-from module import *
+from core.res_unet import *
 from emailtool import *
 
 
@@ -15,7 +15,7 @@ def train():
     # 定义训练的设备
     dev = torch.device(device=config.device if torch.cuda.is_available() else "cpu")
     # 创建网络模型、优化器
-    module = Res_U_Net().to(device=dev)
+    module = ResUnet(3).to(device=dev)
     optimizer = torch.optim.Adam(params=module.parameters(), lr=config.learning_rate)
 
 
