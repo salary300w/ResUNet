@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from PIL import Image
-from module import *
+from core.res_unet import *
 from emailtool import *
 from config import *
 
@@ -11,10 +11,10 @@ def res_net_out(Module_dir,input_dir):
         input_dir:需要输入的图片路径
     '''
     config=NetConfig()
-    res_net_module=torch.load(Module_dir)
+    module=torch.load(Module_dir)
     image=Image.open(input_dir)
     image=config.transform(image)
-    image=res_net_module(image)
+    image=module(image)
     transformer = torchvision.transforms.ToPILImage()
     image=transformer(image)
     return image
