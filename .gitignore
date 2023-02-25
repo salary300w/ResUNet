@@ -3,3 +3,4 @@ __pycache__
 train_logs
 module_file
 data2train
+logs

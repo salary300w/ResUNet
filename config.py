@@ -28,5 +28,3 @@ class NetConfig:
         self.batch_size=2
         self.num_workers=4
         self.loss_fn=nn.MSELoss()
-        self.transform = torchvision.transforms.Compose([
-                                            torchvision.transforms.ToTensor()])
