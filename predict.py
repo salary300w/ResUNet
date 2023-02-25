@@ -1,5 +1,7 @@
 from PIL import Image
 from unet import Unet
+import os
+from tqdm import tqdm
 
 
 def predict(ImagePath, SavePath, NameClasses, ModelPath, MixType):
@@ -10,19 +12,26 @@ def predict(ImagePath, SavePath, NameClasses, ModelPath, MixType):
     # -------------------------------------------------------------------------#
     #   name_classes        区分的种类，和json_to_dataset里面的一样，用于打印种类和数量
     # -------------------------------------------------------------------------#
-    try:
-        image = Image.open(ImagePath)
-    except:
-        print('Open Error! Try again!')
+    if not os.path.exists(SavePath):
+        os.makedirs(SavePath)
+    if os.path.isdir(ImagePath):
+        for filename in tqdm(os.listdir(ImagePath)):
+            image = Image.open(os.path.join(ImagePath, filename))
+            savepath = os.path.join(SavePath, os.path.splitext(filename)[0]+'.png')
+            unet.detect_image(image,NameClasses).save(savepath)
     else:
-        r_image = unet.detect_image(image, name_classes=NameClasses)
-        r_image.save(SavePath)
-        print('perdict done!')
-        print('----------------------------------------------------------------------')
-
+        filename= os.path.splitext(os.path.basename(ImagePath))[0]
+        image = Image.open(ImagePath)
+        savepath = os.path.join(SavePath, filename+'.png')
+        unet.detect_image(image,NameClasses).save(savepath)
+    print('perdict done!')
 
 if __name__ == "__main__":
     name_classes = ["background", "feat", "ress", "bott"]
+    modelpath = 'logs/best_epoch_weights.pth'
+
+    # 可以是文件也可以是文件夹
     imagepath = 'data/val/images/cc7.jpg'
-    savepath = './predict-image.png'
-    predict(ImagePath=imagepath, SavePath=savepath, NameClasses=name_classes, ModelPath='logs/best_epoch_weights.pth', MixType=1)
+    save_dir = './predict_out'
+    MixType = 1
+    predict(ImagePath=imagepath, SavePath=save_dir, NameClasses=name_classes, ModelPath=modelpath, MixType=MixType)
