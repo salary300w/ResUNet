@@ -6,3 +6,4 @@ data2train
 model_data
 logs
 predict_out
+VOCdevkit
