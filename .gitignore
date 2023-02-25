@@ -4,3 +4,4 @@ train_logs
 module_file
 data2train
 logs
+predict_out

@@ -31,7 +31,7 @@ if __name__ == "__main__":
     modelpath = 'logs/best_epoch_weights.pth'
 
     # 可以是文件也可以是文件夹
-    imagepath = 'data/val/images/cc7.jpg'
+    imagepath = 'data/val/images'
     save_dir = './predict_out'
     MixType = 1
     predict(ImagePath=imagepath, SavePath=save_dir, NameClasses=name_classes, ModelPath=modelpath, MixType=MixType)
