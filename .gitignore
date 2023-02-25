@@ -3,5 +3,6 @@ __pycache__
 train_logs
 module_file
 data2train
+model_data
 logs
 predict_out
