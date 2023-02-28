@@ -4,7 +4,6 @@ import numpy as np
 import os
 
 
-
 # 计算混淆矩阵 数据，像素匹配率
 def rightrate(photoname):
     # 读取图片文件
@@ -38,8 +37,6 @@ def rightrate(photoname):
     backtobottom = 0  # 背景预测为回波个数
     backtoress = 0  # 背景预测为电阻丝个数
     backtofeat = 0  # 背景预测为特征线个数
-
-    file_write_obj = open("addr.txt", 'w')
     for i in range(240):
         for j in range(400):
             if y_true[i][j] == 1:
@@ -82,6 +79,7 @@ def rightrate(photoname):
                     backtobottom += 1
                 elif y_pred[i][j][0] == 128 and y_pred[i][j][1] == 0 and y_pred[i][j][2] == 0:
                     backtofeat += 1
-    word = photoname+'特征线正确率：'+str(featrueline_right/featrueline_count)+'电阻丝正确率：'+str(ress_right/ress_count)+'回波正确率：'+str(bottom_right/bottom_count)+'背景正确率'+str(back_right/back_count)+'特征线2背景正确率：'+str(featruelinetoback/featrueline_count)+'特征线2电阻丝正确率：'+str(featruelinetoress/featrueline_count)+'特征线2回波正确率：'+str(featruelinetobottom/featrueline_count)+'电阻丝2背景正确率：'+str(
-        resstoback/ress_count)+'电阻丝2特征线正确率：'+str(resstofeat/ress_count)+'电阻丝2回波正确率：'+str(resstobottom/ress_count)+'回波2背景正确率：'+str(bottomtoback/bottom_count)+'回波2特征线正确率：'+str(bottomtofeat/bottom_count)+'回波2电阻丝正确率：'+str(bottomtoress/bottom_count)+'背景2特征线正确率：'+str(backtofeat/back_count)+'背景2回波正确率：'+str(backtobottom/back_count)+'背景2电阻丝正确率：'+str(backtoress/back_count)
+    word = photoname+'特征线正确率：'+str(featrueline_right/featrueline_count)+'\n电阻丝正确率：'+str(ress_right/ress_count)+'\n回波正确率：'+str(bottom_right/bottom_count)+'\n背景正确率'+str(back_right/back_count)+'\n特征线2背景正确率：'+str(featruelinetoback/featrueline_count)+'\n特征线2电阻丝正确率：'+str(featruelinetoress/featrueline_count)+'\n特征线2回波正确率：'+str(featruelinetobottom/featrueline_count)+'\n电阻丝2背景正确率：'+str(
+        resstoback/ress_count)+'\n电阻丝2特征线正确率：'+str(resstofeat/ress_count)+'\n电阻丝2回波正确率：'+str(resstobottom/ress_count)+'\n回波2背景正确率：'+str(bottomtoback/bottom_count)+'\n回波2特征线正确率：'+str(bottomtofeat/bottom_count)+'\n回波2电阻丝正确率：'+str(bottomtoress/bottom_count)+'\n背景2特征线正确率：'+str(backtofeat/back_count)+'\n背景2回波正确率：'+str(backtobottom/back_count)+'\n背景2电阻丝正确率：'+str(backtoress/back_count)
+    word += '\n\n'
     return word
