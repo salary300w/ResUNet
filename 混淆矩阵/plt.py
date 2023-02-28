@@ -34,3 +34,4 @@ for num in mutix:
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
     plt.savefig(os.path.join(savepath,num[0]))
+    plt.close()
