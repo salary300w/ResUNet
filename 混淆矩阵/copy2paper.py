@@ -3,7 +3,7 @@ import os
 import shutil
 
 
-photoname=['normalsalt001105','normalsalt00199','kd10','ghgs0000139','kdsalt00110','normal99','normalgs0000199','normalfz105','normalsalt000599','kdgs0000110','normal105','ghsalt000539','ghsalt000541','normalfz99','kdfz10','kdsalt000510']
+photoname=['ghsalt000539','kd10','normal105']
 
 srcdirp_pre='predict_out'
 srcdirp_rea='data/val/labels'
