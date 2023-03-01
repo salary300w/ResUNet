@@ -2,7 +2,7 @@ import cv2
 import os
 
 
-# 对图片进行开运算
+# 对图片进行闭运算
 filename = 'opening_Noise_Example.png'
 
 # 读入RGB图像
