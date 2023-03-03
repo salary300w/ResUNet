@@ -22,7 +22,7 @@ class NetConfig:
         self.email = True
         self.email_address = 'Atm991014@163.com'
         self.tensorboard = True
-        self.data_dir='/home/cdk991014/workspace/ResUNet/data'
+        self.data_dir='data'
         self.module_save_dir='module_file'
         self.learning_rate=1e-3
         self.batch_size=2

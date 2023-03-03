@@ -7,9 +7,10 @@ def get_data_and_label(root_dir, is_train=True):
     # 定义训练集、验证集路径、训练集输入列表、训练集标签列表、验证集输入列表、验证集标签列表
     images_path = []
     labels_path = []
-    path = os.path.join(root_dir, 'val')
     if is_train:
         path = os.path.join(root_dir, 'train')
+    else:
+        path = os.path.join(root_dir, 'val')
     for filename in os.listdir(os.path.join(path, 'images')):
         name = os.path.splitext(filename)[0]
         images_filename = name+'.jpg'
