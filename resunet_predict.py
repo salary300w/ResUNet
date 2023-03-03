@@ -17,22 +17,26 @@ def predict(ImagePath, SavePath, ModelPath):
         for filename in tqdm(os.listdir(ImagePath)):
             image = Image.open(os.path.join(ImagePath, filename))
             image = img2tensor(image)
+            # 添加batch_size属性
+            image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
             outputs = model(image)
             outputs = tensor2img(outputs)
             savepath = os.path.join(SavePath, os.path.splitext(filename)[0]+'.png')
             Image.save(savepath, outputs)
     else:
-        image = Image.open(os.path.join(ImagePath))
+        image = Image.open(ImagePath)
         image = img2tensor(image)
+        # 添加batch_size属性
+        image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
         outputs = model(image)
         outputs = tensor2img(outputs)
-        savepath = os.path.join(SavePath,'1.png')
+        savepath = os.path.join(SavePath, '1.png')
         Image.save(savepath, outputs)
     print('perdict done!')
 
 
 if __name__ == "__main__":
-    modelpath = 'module_file/1677824486.3679621/module_loss=0.00035'
+    modelpath = 'resunet'
     # 可以是文件也可以是文件夹
     imagepath = 'data/train/images/cc1.jpg'
     save_dir = './mypredict'

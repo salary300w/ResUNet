@@ -18,7 +18,7 @@ def train():
     module = ResUnet(3).to(device=dev)
     optimizer = torch.optim.Adam(params=module.parameters(), lr=config.learning_rate)
     img_transform=torchvision.transforms.Compose([
-        torchvision.transforms.PILToTensor()
+        torchvision.transforms.ToTensor()
     ])
 
     # 数据集准备
