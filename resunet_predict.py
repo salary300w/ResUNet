@@ -5,10 +5,22 @@ import torch
 import torchvision
 
 
+def LtoRGB(image):
+    image=image.convert("RGB")
+    pixel_access = image.load()
+    for i in range(400):
+        for j in range(240):
+            if pixel_access[i, j][0] == 1:
+                pixel_access[i, j] = (255, 0, 0)
+            elif pixel_access[i, j][0] == 2:
+                pixel_access[i, j] = (0, 255, 0)
+            elif pixel_access[i, j][0] == 3:
+                pixel_access[i, j] = (0, 0, 255)
+    return image
 def predict(ImagePath, SavePath, ModelPath):
 
     model = torch.load(ModelPath)
-    img2tensor = torchvision.transforms.PILToTensor()
+    img2tensor = torchvision.transforms.ToTensor()
     tensor2img = torchvision.transforms.ToPILImage()
 
     if not os.path.exists(SavePath):
@@ -20,18 +32,24 @@ def predict(ImagePath, SavePath, ModelPath):
             # 添加batch_size属性
             image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
             outputs = model(image)
+            # 去除batch_size属性
+            outputs = outputs.reshape(image.shape[1], image.shape[2], image.shape[3])
             outputs = tensor2img(outputs)
+            outputs = LtoRGB(outputs)
             savepath = os.path.join(SavePath, os.path.splitext(filename)[0]+'.png')
-            Image.save(savepath, outputs)
+            outputs.save(savepath)
     else:
         image = Image.open(ImagePath)
         image = img2tensor(image)
         # 添加batch_size属性
         image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
         outputs = model(image)
+        # 去除batch_size属性
+        outputs = outputs.reshape(outputs.shape[1], outputs.shape[2], outputs.shape[3])
         outputs = tensor2img(outputs)
-        savepath = os.path.join(SavePath, '1.png')
-        Image.save(savepath, outputs)
+        outputs = LtoRGB(outputs)
+        savepath = os.path.join(SavePath, os.path.splitext(os.path.basename(ImagePath))[0]+'.png')
+        outputs.save(savepath)
     print('perdict done!')
 
 
