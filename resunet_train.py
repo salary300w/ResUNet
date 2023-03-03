@@ -3,7 +3,6 @@ import torch
 import time
 import datetime
 import os
-import shutil
 from config import *
 from dataset import *
 from core.res_unet import *
