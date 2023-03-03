@@ -53,10 +53,10 @@ def train():
         writer = SummaryWriter(os.path.join(config.log_save_dir, time_now))
 
     # 创建train_loss.txt保存训练集损失
-    train_loss_file = open(os.path.join(config.log_save_dir, time_now, 'train_loss.txt'), 'w')
+    train_loss_file = open(os.path.join(config.log_save_dir, time_now, 'train_loss.txt'), 'a')
 
     # 创建val_loss.txt保存测试集损失
-    val_loss_file = open(os.path.join(config.log_save_dir, time_now, 'val_loss.txt'), 'w')
+    val_loss_file = open(os.path.join(config.log_save_dir, time_now, 'val_loss.txt'), 'a')
 
     # 设置模型存储目录
     save_path = config.module_save_dir
@@ -121,6 +121,7 @@ def train():
         # 进行模型保存
         if total_test_loss < Loss_val:
             savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss, device=dev)
+        Loss_val=total_test_loss
         test_step += 1
     # -----迭代结束-----
     # 计算训练用时并输出
@@ -144,7 +145,7 @@ def train():
 def savemodule(MODULE, PATH, LOSS, device):
     MODULE.to(torch.device(device="cpu"))  # 将模型转移至cpu保存
     torch.save(MODULE, os.path.join(PATH, "module_loss={}".format(round(LOSS.item(), 5))))
-    MODULE.to(torch.device(device=device))  # 将模型转移至cpu保存
+    MODULE.to(torch.device(device=device))  # 将模型转移回原训练设备
 
 
 if __name__ == "__main__":
