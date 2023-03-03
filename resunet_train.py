@@ -118,7 +118,7 @@ def train():
             writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
         # 记录损失值
         val_loss_file.write(str(total_test_loss)+'\n')
-        print("----- 测试Loss: {} -----".format(test_step, total_test_loss))
+        print("----- 测试Loss: {} -----".format(total_test_loss))
         print(f"----- 总用时: {time.time()-start_time:.2f} 秒 -----")
         # 进行模型保存
         if total_test_loss < Loss_val:
