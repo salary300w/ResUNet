@@ -1,6 +1,7 @@
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import time
+import datetime
 import os
 import shutil
 from config import *
@@ -9,21 +10,22 @@ from core.res_unet import *
 from emailtool import *
 from tqdm import tqdm
 
+
 def train():
-    
-    config=NetConfig()
+
+    config = NetConfig()
     # 定义训练的设备
     dev = torch.device(device=config.device if torch.cuda.is_available() else 'cpu')
     # 创建网络模型、优化器
     module = ResUnet(3).to(device=dev)
     optimizer = torch.optim.Adam(params=module.parameters(), lr=config.learning_rate)
-    img_transform=torchvision.transforms.Compose([
+    img_transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor()
     ])
 
     # 数据集准备
-    train_data = Mydataset(root_dir=config.data_dir,is_train=True,transform=img_transform)
-    test_data = Mydataset(root_dir=config.data_dir,is_train=False,transform=img_transform)
+    train_data = Mydataset(root_dir=config.data_dir, is_train=True, transform=img_transform)
+    test_data = Mydataset(root_dir=config.data_dir, is_train=False, transform=img_transform)
 
     # 数据集大小
     print("-----训练集大小= {} -----".format(len(train_data)))
@@ -33,22 +35,25 @@ def train():
     train_loader = DataLoader(dataset=train_data, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
     test_loader = DataLoader(dataset=test_data, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
 
-    #损失函数,转移至训练设备
+    # 损失函数,转移至训练设备
     loss_fn = config.loss_fn.to(device=dev)
     # optimizer = torch.optim.SGD(params=module.parameters(), lr=learning_rate)
 
     # 记录测试的次数
     test_step = 0
 
+    # 记录训练开始的时刻
+    time_now = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
+
     if config.tensorboard:
         # 使用tensorboard画出训练曲线
-        if os.path.exists("train_logs"):
-            shutil.rmtree("train_logs")
-        writer = SummaryWriter("train_logs")
+        if os.path.exists(config.log_save_dir):
+            shutil.rmtree(config.log_save_dir)
+        writer = SummaryWriter(os.path.join(config.log_save_dir, time_now))
 
     # 设置模型存储目录
     save_path = config.module_save_dir
-    save_path = os.path.join(save_path, str(time.time()))
+    save_path = os.path.join(save_path, time_now)
     os.makedirs(save_path)
 
     # -----开始训练-----
@@ -65,7 +70,7 @@ def train():
             # 转移至训练设备
             imgs = imgs.to(dev)
             labels = labels.to(dev)
-            
+
             # 将数据输入模型
             outputs = module(imgs)
 
@@ -109,6 +114,8 @@ def train():
                 writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
             print("-----第 {} 轮测试Loss: {} -----".format(test_step, total_test_loss/len(test_data)))
             print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
+            # 进行模型保存
+            savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss/len(test_data))
     # -----迭代结束-----
     # 计算训练用时并输出
     end_time = time.time()
@@ -116,11 +123,6 @@ def train():
     print("-----训练完成-----")
     print(f"-----总用时: {elapsed_time:.2f} 秒-----")
     print("-----总迭代次数: {} -----".format(i))
-
-    # 如果没有模型保存，则进行模型保存
-    if not os.listdir(save_path):
-        savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss)
-    writer.close()
 
     # 发送邮件
     if config.email:
@@ -137,6 +139,7 @@ def savemodule(MODULE, PATH, LOSS):
     print("-----保存模型参数-----")
     MODULE.to(torch.device(device="cpu"))  # 将模型转移至cpu保存
     torch.save(MODULE, os.path.join(PATH, "module_loss={}".format(round(LOSS.item(), 5))))
+
 
 if __name__ == "__main__":
     train()

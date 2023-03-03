@@ -24,6 +24,7 @@ class NetConfig:
         self.tensorboard = True
         self.data_dir='data'
         self.module_save_dir='module_file'
+        self.log_save_dir='train_logs'
         self.learning_rate=1e-3
         self.batch_size=2
         self.num_workers=4
