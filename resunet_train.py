@@ -40,7 +40,10 @@ def train():
     # optimizer = torch.optim.SGD(params=module.parameters(), lr=learning_rate)
 
     # 记录测试的次数
-    test_step = 0
+    test_step = 1
+
+    # 记录初始的损失
+    Loss_val = float('inf')
 
     # 记录训练开始的时刻
     time_now = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
@@ -51,13 +54,18 @@ def train():
             shutil.rmtree(config.log_save_dir)
         writer = SummaryWriter(os.path.join(config.log_save_dir, time_now))
 
+    # 创建train_loss.txt保存训练集损失
+    train_loss_file = open(os.path.join(config.log_save_dir, time_now, 'train_loss.txt'), 'w')
+
+    # 创建val_loss.txt保存测试集损失
+    val_loss_file = open(os.path.join(config.log_save_dir, time_now, 'val_loss.txt'), 'w')
+
     # 设置模型存储目录
     save_path = config.module_save_dir
     save_path = os.path.join(save_path, time_now)
     os.makedirs(save_path)
 
     # -----开始训练-----
-    print("-----开始训练-----")
     start_time = time.time()
     for i in range(1, config.epoch+1):
         print("-----第 {} 轮训练开始-----".format(i))
@@ -83,39 +91,42 @@ def train():
             loss.backward()
             optimizer.step()
         # 计算本轮训练集的正确率
-        print("-----第 {} 轮训练Loss: {} -----".format(i, total_train_loss/len(train_data)))
+        average_loss = total_train_loss/len(train_data)
+        train_loss_file.write(str(average_loss)+'\n')
+        print("-----第 {} 轮训练Loss: {} -----".format(i, average_loss))
         print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
 
         # 绘制训练曲线图
         if config.tensorboard:
             writer.add_scalar(tag="total_train_loss", scalar_value=total_train_loss, global_step=i)
-
         # 训练集准确度达标则进行测试
-        if i == config.epoch or i % 5 == 0:
-            # 测试步骤开始
-            print("-----开始测试-----")
-            module.eval()  # 设定为验证模式，仅对某些特殊层生效，具体看说明文档
-            with torch.no_grad():  # 去掉梯度，保证测试过程不会对网络模型的参数调优
-                for data in test_loader:
-                    imgs, labels = data
-                    # 转移至训练设备
-                    imgs = imgs.to(dev)
-                    labels = labels.to(dev)
+        # 测试步骤开始
+        print("-----第 {} 轮训练开始-----".format(test_step))
+        module.eval()  # 设定为验证模式，仅对某些特殊层生效，具体看说明文档
+        with torch.no_grad():  # 去掉梯度，保证测试过程不会对网络模型的参数调优
+            for data in tqdm(test_loader):
+                imgs, labels = data
+                # 转移至训练设备
+                imgs = imgs.to(dev)
+                labels = labels.to(dev)
 
-                    # 将数据输入模型
-                    outputs = module(imgs)
+                # 将数据输入模型
+                outputs = module(imgs)
 
-                    # 累加测试集的损失值
-                    loss = loss_fn(outputs, labels)
-                    total_test_loss += loss
-            test_step += 1
-            # 绘制测试曲线图
-            if config.tensorboard:
-                writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
-            print("-----第 {} 轮测试Loss: {} -----".format(test_step, total_test_loss/len(test_data)))
-            print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
-            # 进行模型保存
-            savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss/len(test_data))
+                # 累加测试集的损失值
+                loss = loss_fn(outputs, labels)
+                total_test_loss += loss
+        average_loss = total_test_loss/len(test_data)
+        # 绘制测试曲线图
+        if config.tensorboard:
+            writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
+        val_loss_file.write(str(average_loss)+'\n')
+        print("-----第 {} 轮测试Loss: {} -----".format(test_step, average_loss))
+        print(f"-----总用时: {time.time()-start_time:.2f} 秒-----")
+        # 进行模型保存
+        if average_loss < Loss_val:
+            savemodule(MODULE=module, PATH=save_path, LOSS=average_loss)
+        test_step += 1
     # -----迭代结束-----
     # 计算训练用时并输出
     end_time = time.time()
@@ -139,7 +150,6 @@ def savemodule(MODULE, PATH, LOSS):
     print("-----保存模型参数-----")
     MODULE.to(torch.device(device="cpu"))  # 将模型转移至cpu保存
     torch.save(MODULE, os.path.join(PATH, "module_loss={}".format(round(LOSS.item(), 5))))
-
 
 if __name__ == "__main__":
     train()
