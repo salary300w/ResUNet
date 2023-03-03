@@ -28,4 +28,4 @@ class NetConfig:
         self.learning_rate=1e-3
         self.batch_size=2
         self.num_workers=4
-        self.loss_fn=nn.MSELoss()
+        self.loss_fn=nn.CrossEntropyLoss()

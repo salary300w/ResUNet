@@ -93,7 +93,7 @@ def train():
         if config.tensorboard:
             writer.add_scalar(tag="total_train_loss", scalar_value=total_train_loss, global_step=i)
         # 记录损失值
-        train_loss_file.write(str(total_train_loss)+'\n')
+        train_loss_file.write(str(round(total_train_loss.item(), 7))+'\n')
         # 训练集准确度达标则进行测试
         # 测试步骤开始
         print("----- 第 {} 轮测试开始 -----".format(test_step))
@@ -115,7 +115,7 @@ def train():
         if config.tensorboard:
             writer.add_scalar(tag="test_loss", scalar_value=total_test_loss, global_step=test_step)
         # 记录损失值
-        val_loss_file.write(str(total_test_loss)+'\n')
+        val_loss_file.write(str(round(total_test_loss.item(), 7))+'\n')
         print("----- 测试Loss: {} -----".format(total_test_loss))
         print(f"----- 总用时: {time.time()-start_time:.2f} 秒 -----")
         # 进行模型保存
