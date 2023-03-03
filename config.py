@@ -17,7 +17,7 @@ def singleton(cls):
 @singleton
 class NetConfig:
     def __init__(self):
-        self.epoch = 1
+        self.epoch = 100
         self.device = 'cuda'
         self.email = True
         self.email_address = 'Atm991014@163.com'
