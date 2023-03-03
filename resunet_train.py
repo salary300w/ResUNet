@@ -50,8 +50,6 @@ def train():
 
     if config.tensorboard:
         # 使用tensorboard画出训练曲线
-        if os.path.exists(config.log_save_dir):
-            shutil.rmtree(config.log_save_dir)
         writer = SummaryWriter(os.path.join(config.log_save_dir, time_now))
 
     # 创建train_loss.txt保存训练集损失
