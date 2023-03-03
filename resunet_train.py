@@ -120,8 +120,8 @@ def train():
         print(f"----- 总用时: {time.time()-start_time:.2f} 秒 -----")
         # 进行模型保存
         if total_test_loss < Loss_val:
-            savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss, device=dev)
-        Loss_val=total_test_loss
+            savemodule(MODULE=module, PATH=save_path, LOSS=total_test_loss, EPOCH=i, device=dev)
+        Loss_val = total_test_loss
         test_step += 1
     # -----迭代结束-----
     # 计算训练用时并输出
@@ -142,9 +142,9 @@ def train():
         )
 
 
-def savemodule(MODULE, PATH, LOSS, device):
+def savemodule(MODULE, PATH, LOSS, EPOCH, device):
     MODULE.to(torch.device(device="cpu"))  # 将模型转移至cpu保存
-    torch.save(MODULE, os.path.join(PATH, "module_loss={}".format(round(LOSS.item(), 5))))
+    torch.save(MODULE, os.path.join(PATH, "Epoch_{}loss_{}".format(EPOCH, round(LOSS.item(), 7))))
     MODULE.to(torch.device(device=device))  # 将模型转移回原训练设备
 
 
